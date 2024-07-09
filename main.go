@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/yuri-pires/busca-cep/request"
+	"github.com/yuri-pires/busca-cep/services"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func BuscaCepHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Chama a função BuscarCep do pacote 'request' para buscar o CEP
-	viaCepResponse := request.BuscarCep(cepParam)
+	viaCepResponse := services.BuscarCep(cepParam)
 	// Converte a resposta da função BuscarCep (uma struct) para JSON
 	cepJson, err := json.Marshal(viaCepResponse)
 
