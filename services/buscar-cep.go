@@ -1,10 +1,12 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 type ViaCepResponse struct {
@@ -22,16 +24,29 @@ type ViaCepResponse struct {
 }
 
 func BuscarCep(cep string) *ViaCepResponse {
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, time.Minute)
+	defer cancel()
+
 	var viaCepStruct ViaCepResponse
 	viaCepUrl := "https://viacep.com.br/ws/" + cep + "/json/"
 
-	res, err := http.Get(viaCepUrl)
+	// Ao iniciar uma nova request com erro, teremos ou um Ponteiro
+	// com uma requisição ou um erro.
+	// Está requisição seguirá nosso contexto com timeout de 1 minuto.
+	req, err := http.NewRequestWithContext(ctx, "GET", viaCepUrl, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	// Como criamos somente a request acima, precisamos executar ela agora
+	// Utilizaremos o método Do para obter uma Response ou um erro.
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Fatalf("Erro ao realizar consulta no WS Via Cep %v", err)
 	}
-	defer res.Body.Close()
 
-	body, err := io.ReadAll(res.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatalf("Erro ao ler a resposta: %v", err)
 	}
