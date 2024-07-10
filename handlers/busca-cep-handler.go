@@ -9,12 +9,14 @@ import (
 
 // BuscaCepHandler é uma função de handler que segue o padrão (http.ResponseWriter, *http.Request)
 func BuscaCepHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Recurso inválido", http.StatusMethodNotAllowed)
+		return
+	}
+
 	// Extrai o parâmetro 'cep' da URL da requisição
 	cepParam := r.URL.Query().Get("cep")
-
-	// Verifica se o parâmetro 'cep' está presente na requisição
-	// Válida também o Recurso chamado
-	if cepParam == "" || r.Method != "GET" {
+	if cepParam == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Informe o CEP para realizar a busca"))
 		// Early return para encerrar a função em caso de erro

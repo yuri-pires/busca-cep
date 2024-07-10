@@ -28,9 +28,7 @@ func BuscarCep(cep string) *ViaCepResponse {
 	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 
-	var viaCepStruct ViaCepResponse
 	viaCepUrl := "https://viacep.com.br/ws/" + cep + "/json/"
-
 	// Ao iniciar uma nova request com erro, teremos ou um Ponteiro
 	// com uma requisição ou um erro.
 	// Está requisição seguirá nosso contexto com timeout de 1 minuto.
@@ -45,15 +43,15 @@ func BuscarCep(cep string) *ViaCepResponse {
 	if err != nil {
 		log.Fatalf("Erro ao realizar consulta no WS Via Cep %v", err)
 	}
+	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatalf("Erro ao ler a resposta: %v", err)
 	}
 
-	err = json.Unmarshal(body, &viaCepStruct)
-
-	if err != nil {
+	var viaCepStruct ViaCepResponse
+	if err := json.Unmarshal(body, &viaCepStruct); err != nil {
 		log.Fatalf("Erro ao transformar resposta: %v", err)
 	}
 
